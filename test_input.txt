@@ -1,0 +1,38 @@
+class JustTheTop( x: Int ) extends Another
+	{
+	def STR() : String {
+			if 2 == 3 {
+			}
+			
+			elif y < x {
+			x = y; }
+			
+			else {
+			}
+			
+		 }
+	}
+
+class Another( y: Obj )
+	{	def STR() : String {
+		 }
+		 
+	def PLUS(other: Pt): Pt{
+	return Pt(this.x + other.x, this.y + other.y);
+	}
+		 }
+		 
+
+foo.y = -5;
+3<5;
+
+Another(y);
+
+if x=y {
+this.x = x;
+}
+
+while x < 5{
+this.k = f;
+}
+
