@@ -52,12 +52,12 @@ terminal			COMMA, SEMICOLON, DOT, COLON;
 terminal Integer 	INT;
 terminal String 	STRING, IDENT;
 
-non terminal 			Program, Statement, Class, Class_Signature, Class_Body, Statement_Block;
-non terminal 			Formals, Formals_nonEmpty, Formal_Arg, Methods, Method, Actual_Args, Args_nonEmpty;
-non terminal 			Return_Statement, Elif_Statement, Elif_Statements, Else_Statement;
-non terminal Expr		R_Expr, L_Expr;
-non terminal Ident		OptExtends;
-non terminal LinkedList Classes, Statements;
+non terminal 				Program, Statement, Class, Class_Signature, Class_Body;
+non terminal 				Formals, Formals_nonEmpty, Formal_Arg, Methods, Method, Actual_Args, Args_nonEmpty;
+non terminal 				Return_Statement, Elif_Statement, Else_Statement;
+non terminal Expr			R_Expr, L_Expr;
+non terminal Ident			OptExtends;
+non terminal LinkedList 	Classes, Statements, Statement_Block, Elif_Statements;
 
 precedence left PLUS, MINUS;
 precedence left TIMES, DIVIDE;
@@ -89,7 +89,7 @@ precedence left DOT;
    Class_Body		::= LBRACKET Statements Methods RBRACKET
    					;
 					
-   Statement_Block ::=	LBRACKET Statements RBRACKET
+   Statement_Block ::=	LBRACKET Statements:s RBRACKET								{: RESULT = s; :}
    					;
 					
    Statement		::= IF R_Expr Statement_Block Elif_Statements Else_Statement
@@ -97,18 +97,18 @@ precedence left DOT;
 					|	Return_Statement
 					|	L_Expr COLON IDENT EQUALS R_Expr SEMICOLON
 					|	L_Expr EQUALS R_Expr SEMICOLON
-					|	R_Expr:r SEMICOLON											   {: if(r != null){RESULT = new Stmt(r.constructor_name);} :}
+					|	R_Expr:r SEMICOLON											   {: if(r != null){RESULT = new Stmt(r, new LinkedList<Stmt>());} :}
 					;
 					
-   Elif_Statements	::= Elif_Statements Elif_Statement
-					|
+   Elif_Statements	::= Elif_Statements:stmts Elif_Statement:s							{: stmts.add(s); RESULT = stmts; :}
+					|																	{: RESULT = new LinkedList<Stmt.IFBRANCH>(); :}
 					;
 		
-   Elif_Statement	::=	ELIF R_Expr Statement_Block
+   Elif_Statement	::=	ELIF R_Expr:r Statement_Block:s									{: RESULT = Stmt.ifbranch(r, s); :}
 					;
 					
-   Else_Statement	::= ELSE Statement_Block
-   					|
+   Else_Statement	::= ELSE Statement_Block:s											{: RESULT = Stmt.ifbranch(new Expr("True"), s); :}
+   					|																	{: RESULT = new LinkedList<Stmt.IFBRANCH>(); :}
 					;
 			
    Return_Statement	::=	RETURN SEMICOLON

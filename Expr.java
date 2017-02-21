@@ -3,6 +3,7 @@ import java.util.*;
 public class Expr{
 	
 	String constructor_name;
+	String condition_name;
 	
 	public Expr(){
 
@@ -10,6 +11,10 @@ public class Expr{
 	
 	public Expr(String n, LinkedList<Expr> l){
 		this.constructor_name = n;
+	}
+	
+	public Expr(String n){
+		this.condition_name = n;
 	}
 	
 	// Conversion from expr to int
@@ -36,20 +41,6 @@ public class Expr{
 	
 	public static StringConst stringconst(String s){
 		return new StringConst(s);
-	}
-	
-	public static class Construct extends Expr{
-		public Ident i;
-		public String name;
-		
-		public Construct(Ident i){
-			this.i = i;
-			this.name = i.name;
-		}
-	}
-	
-	public static Construct construct(Ident i){
-		return new Construct(i);
 	}
 	
 	public static class BinOp extends Expr{
