@@ -15,8 +15,30 @@ public class scanner_driver {
 	  LinkedList super_names = new LinkedList<String>();
 	  LinkedList visited = new LinkedList<String>();
 	  for(int i = 0; i < result.class_list.size(); i++){
-		  String c_name = result.class_list.get(i).sig.name;
-		  String c_super = result.class_list.get(i).sig.super_class;
+		  LinkedList cur_methods = new LinkedList<String>();
+		  CLS cur_class = result.class_list.get(i);
+		  String c_name = cur_class.sig.name;
+		  String c_super = cur_class.sig.super_class;
+		  
+		  //Checking if methods are redefined in current class
+		  if(cur_class.bd.methods != null){
+			  for(int j = 0; j < cur_class.bd.methods.size(); j++){
+				  String cm = cur_class.bd.methods.get(j).name;
+				  if(cur_methods.contains(cm)){
+		      		System.err.println("ERROR: Method " + cm + " defined twice in class " + c_name);
+		    			System.exit(1);
+				  }
+				  
+				  cur_methods.add(cm);
+		  	
+			  }
+		  }
+		  
+		  //Checking if the same class is redefined
+		  if(class_names.contains(c_name)){
+    		System.err.println("ERROR: Class " + c_name + " defined twice ");
+  			System.exit(1);
+		  }
 		  class_names.add(c_name);
 		  super_names.add(c_super);
 	  }
