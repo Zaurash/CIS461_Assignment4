@@ -28,6 +28,7 @@ foo.y = -5;
 
 Another(y);
 
+
 if x=y {
 this.x = x;
 }

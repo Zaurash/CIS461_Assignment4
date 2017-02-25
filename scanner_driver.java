@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import java.lang.*;
 
 
 public class scanner_driver {
@@ -9,7 +10,7 @@ public class scanner_driver {
     try {
       parser p = new parser(new Lexer(new FileReader(argv[0])));
       Program result = (Program)p.parse().value;
-	  System.out.println("Parsing completed with no errors");    
+	  System.out.println("Parsing completed with no errors");
 	  LinkedList class_names = new LinkedList<String>();
 	  LinkedList super_names = new LinkedList<String>();
 	  LinkedList visited = new LinkedList<String>();
@@ -37,14 +38,17 @@ public class scanner_driver {
 	  // Tests to see if constructor calls have existing classes
 	  for(int i = 0; i < result.statement_list.size(); i++){
 		  Stmt temp = result.statement_list.get(i);
-		  if(temp != null){
-			  if (CLS.check_super(result, temp.constructor_name)){
-			  }
-			  else {
-				  System.err.println("ERROR: called constructor " + temp.constructor_name + " calls a class that does not exist");
-				  System.exit(1);
-			  }
+		  if (Stmt.CStatement.class.isInstance(result.statement_list.get(i))){
+			  Stmt.CStatement nt = (Stmt.CStatement)result.statement_list.get(i);
+				  if (CLS.check_super(result, nt.constructor_name)){
+				  }
+				  else {
+					  System.err.println("ERROR: called constructor " + nt.constructor_name + " which calls a class that does not exist");
+					  System.exit(1);
+				  }
+			 
 		  }
+
 	  }
 
 	  

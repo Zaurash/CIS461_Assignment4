@@ -1,18 +1,12 @@
 import java.util.*;
 
 public class Stmt{
-	
-	public String constructor_name;
-	
+		
 	public Stmt(){
 		
 	}
-	
-	public Stmt(Expr n, LinkedList<Stmt> stmts){
-		this.constructor_name = n.constructor_name;
-	}
-	
-	public class WhileStmt extends Stmt{
+		
+	public static class WhileStmt extends Stmt{
 		public Expr condition;
 		public LinkedList<Stmt> stmts;
 		
@@ -22,27 +16,40 @@ public class Stmt{
 		}
 	}
 	
-	public class IfStmt extends Stmt{
-		public LinkedList<IFBRANCH> ifbranch;
+	public static WhileStmt whilestmt(Expr condition, LinkedList<Stmt> stmts){
+		return new WhileStmt(condition, stmts);
+	}	
+	
+	public static class IfStmt extends Stmt{
+		public LinkedList<IFBRANCH> ifstmts = new LinkedList<IFBRANCH>();;
 		
-		public IfStmt(){
-			
+		public IfStmt(Expr e, LinkedList<Stmt> stmts, LinkedList<IFBRANCH> elifst, IFBRANCH elsest){
+			this.ifstmts.add(ifbranch(e, stmts));
+			this.ifstmts.addAll(elifst);
+			this.ifstmts.add(elsest);
 		}
 	
 	}
 	
-	public class AssignStmt extends Stmt{
-		public Expr L_Expr;
-		public Expr R_Expr;
+	public static IfStmt ifstmt(Expr e, LinkedList<Stmt> stmts, LinkedList<IFBRANCH> elifst, IFBRANCH elsest){
+		return new IfStmt(e, stmts, elifst, elsest);
+	}
+	
+	public static class AssignStmt extends Stmt{
+		public Expr l_expr;
+		public Expr r_expr;
 		
 		public AssignStmt(){
-			
 		}
 		
-		public AssignStmt(Expr l_expr, Expr r_expr){
-			this.L_Expr = l_expr;
-			this.R_Expr = r_expr;
+		public AssignStmt(Expr l, Expr r){
+			this.l_expr = l;
+			this.r_expr = r;
 		}
+	}
+	
+	public static AssignStmt assignstmt(Expr l, Expr r){
+		return new AssignStmt(l,r);
 	} 
 	
 	public static class IFBRANCH extends Stmt{
@@ -57,6 +64,20 @@ public class Stmt{
 	
 	public static IFBRANCH ifbranch(Expr condition, LinkedList<Stmt> stmts){
 		return new IFBRANCH(condition, stmts);
-	}	
+	}
+	
+	public static class CStatement extends Stmt{
+		String constructor_name;
+		LinkedList<Expr> args;
+		
+		public CStatement(Expr.Constructor s){
+			this.constructor_name = s.c_name;
+			this.args = s.args;
+		}
+	}
+	
+	public static CStatement cstatement(Expr.Constructor c){
+		return new CStatement(c);
+	}
 	
 }

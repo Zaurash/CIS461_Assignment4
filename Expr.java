@@ -2,19 +2,14 @@ import java.util.*;
 
 public class Expr{
 	
-	String constructor_name;
-	String condition_name;
+	String name;
 	
 	public Expr(){
 
 	}
 	
-	public Expr(String n, LinkedList<Expr> l){
-		this.constructor_name = n;
-	}
-	
 	public Expr(String n){
-		this.condition_name = n;
+		this.name = n;
 	}
 	
 	// Conversion from expr to int
@@ -74,5 +69,19 @@ public class Expr{
 	public static BinOp binop(String op, Expr a, Expr b){
 		return new BinOp(op, a, b);
 	}
+	
+	public static class Constructor extends Expr{
+		String c_name;
+		LinkedList<Expr> args;
+		
+		public Constructor(String s, LinkedList<Expr>ar){
+			this.c_name = s;
+			this.args = ar;
+		}
+	}
+	
+	public static Constructor constructor(String n, LinkedList<Expr> ar){
+		return new Constructor(n, ar);
+	}	
 	
 }

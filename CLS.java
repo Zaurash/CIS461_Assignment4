@@ -4,10 +4,21 @@ public class CLS{
 		
 	public String name;
 	public String super_class;
+	public CLS.Signature sig;
+	public CLS.Body bd;
+	
+	public CLS(){
+		
+	}
 		
 	public CLS(String n, String s){
 		this.name = n;
 		this.super_class = s;
+	}
+	
+	public CLS(Signature s, Body b){
+		this.sig = s;
+		this.bd = b;
 	}
 		
 		public static Boolean check_super(Program res, String s){
@@ -40,6 +51,33 @@ public class CLS{
 			  }
 		  }
 		return 0;
+		}
+		
+		public static class Signature extends CLS{
+			public String name;
+			public String super_class;
+			
+			public Signature(String n, String s){
+				this.name = n;
+				this.super_class = s;
+			}
+		}
+		
+		public static Signature signature(String n, String s){
+			return new Signature(n,s);
+		}
+		
+		public static class Body extends CLS{
+			public LinkedList<Method> methods;
+			
+			public Body(LinkedList<Method> m){
+				this.methods = m;
+			}
+			
+			public static Body body(LinkedList<Method> m){
+				return new Body(m);
+			}
+			
 		}
 
 
