@@ -15,15 +15,15 @@ public class scanner_driver {
 	  LinkedList super_names = new LinkedList<String>();
 	  LinkedList visited = new LinkedList<String>();
 	  for(int i = 0; i < result.class_list.size(); i++){
-		  String c_name = result.class_list.get(i).name;
-		  String c_super = result.class_list.get(i).super_class;
+		  String c_name = result.class_list.get(i).sig.name;
+		  String c_super = result.class_list.get(i).sig.super_class;
 		  class_names.add(c_name);
 		  super_names.add(c_super);
 	  }
 	  
 	  // Tests to see if superclasses are existing classes 
 	  for(int i = 0; i < result.class_list.size(); i++){
-		  String temp = result.class_list.get(i).super_class;
+		  String temp = result.class_list.get(i).sig.super_class;
 		  if(!class_names.contains(temp)){
   		  	System.err.println("ERROR: super class " + temp + " does not exist ");
 			System.exit(1);

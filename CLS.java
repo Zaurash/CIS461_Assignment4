@@ -2,8 +2,6 @@ import java.util.*;
 
 public class CLS{
 		
-	public String name;
-	public String super_class;
 	public CLS.Signature sig;
 	public CLS.Body bd;
 	
@@ -11,10 +9,10 @@ public class CLS{
 		
 	}
 		
-	public CLS(String n, String s){
+	/*public CLS(String n, String s){
 		this.name = n;
 		this.super_class = s;
-	}
+	}*/
 	
 	public CLS(Signature s, Body b){
 		this.sig = s;
@@ -23,7 +21,7 @@ public class CLS{
 		
 		public static Boolean check_super(Program res, String s){
 	  	  for(int inc = 0; inc < res.class_list.size(); inc++){
-	  		  String temp = res.class_list.get(inc).name;
+	  		  String temp = res.class_list.get(inc).sig.name;
 	  				  if(s.equals(temp)){
 					return true;	  				  	
 	  		  }
@@ -37,7 +35,7 @@ public class CLS{
 		  }
 		  
   	  	  for(int inc = 0; inc < res.class_list.size(); inc++){
-			  CLS temp = res.class_list.get(inc);
+			  Signature temp = res.class_list.get(inc).sig;
 			  
 			  if(s.equals(temp.name)){
 
@@ -69,15 +67,23 @@ public class CLS{
 		
 		public static class Body extends CLS{
 			public LinkedList<Method> methods;
+			public LinkedList<Stmt> statements;
 			
-			public Body(LinkedList<Method> m){
+			public Body(LinkedList<Stmt> s, LinkedList<Method> m){
+				this.statements = s;
 				this.methods = m;
 			}
 			
-			public static Body body(LinkedList<Method> m){
-				return new Body(m);
+			public Body(){
+				this.statements = null;
+				this.methods = null;
 			}
 			
+			
+		}
+		
+		public static Body body(LinkedList<Stmt> s, LinkedList<Method> m){
+			return new Body(s, m);
 		}
 
 

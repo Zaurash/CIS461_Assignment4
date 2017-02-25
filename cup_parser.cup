@@ -53,7 +53,7 @@ terminal			COMMA, SEMICOLON, DOT, COLON;
 terminal Integer 	INT;
 terminal String 	STRING, IDENT;
 
-non terminal 				Program, Statement, Class, Class_Signature, Class_Body;
+non terminal 				Program, Statement, Class;
 non terminal 				Method;
 non terminal 				Return_Statement, Elif_Statement;
 non terminal Method.Argument Formal_Arg;
@@ -61,6 +61,8 @@ non terminal Expr			R_Expr, L_Expr;
 non terminal Ident			OptExtends;
 non terminal LinkedList 	Classes, Statements, Statement_Block, Elif_Statements, Args_nonEmpty, Actual_Args, Formals, Formals_nonEmpty, Methods;
 non terminal Stmt.IFBRANCH	Else_Statement;
+non terminal CLS.Signature	Class_Signature;
+non terminal CLS.Body		Class_Body;
 
 precedence left PLUS, MINUS;
 precedence left TIMES, DIVIDE;
@@ -76,22 +78,24 @@ precedence left DOT;
 					;
    
    Classes			::= Classes:cs Class:c 													{: cs.add(c); RESULT = cs; :}
-   					|																		{: LinkedList<CLS> temp = new LinkedList<CLS>(); temp.add(new CLS("Obj", "Obj"));
-						 																		temp.add(new CLS("String", "Obj")); temp.add(new CLS("Nothing", "Obj")); 
-																								temp.add(new CLS("Int", "Obj")); RESULT = temp; :}
+   					|																		{: LinkedList<CLS> temp = new LinkedList<CLS>(); 
+																								temp.add(new CLS(CLS.signature("Obj", "Obj"), new CLS.Body()));
+						 																		temp.add(new CLS(CLS.signature("String", "Obj"), new CLS.Body()));
+																								temp.add(new CLS(CLS.signature("Nothing", "Obj"), new CLS.Body())); 
+																								temp.add(new CLS(CLS.signature("Int", "Obj"), new CLS.Body())); RESULT = temp; :}
 					;
    
-   Class   			::= Class_Signature:sig Class_Body:bd 									{: RESULT = sig; :}
+   Class   			::= Class_Signature:sig Class_Body:bd 									{: RESULT = new CLS(sig,bd); :}
    					;
    
-   Class_Signature  ::= CLASS IDENT:i LPAREN Formals RPAREN OptExtends:oe 					{: RESULT = new CLS(i, oe.name); :}
+   Class_Signature  ::= CLASS IDENT:i LPAREN Formals RPAREN OptExtends:oe 					{: RESULT = CLS.signature(i, oe.name); :}
    					;
 					
    OptExtends		::= EXTENDS IDENT:i 													{: RESULT = new Ident(i); :}
    					|																		{: Ident temp = new Ident("Obj"); RESULT = temp; :}
 					;
 					
-   Class_Body		::= LBRACKET Statements Methods RBRACKET
+   Class_Body		::= LBRACKET Statements:s Methods:m RBRACKET							{: RESULT = CLS.body(s, m); :}
    					;
 					
    Statement_Block ::=	LBRACKET Statements:s RBRACKET										{: RESULT = s; :}
