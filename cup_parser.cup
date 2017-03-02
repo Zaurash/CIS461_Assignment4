@@ -1,5 +1,5 @@
 /* should -30 be MINUS special_rexpr instead of MINUS expr? */
-/* none vs nothing */
+/* line numbers */
 /* args_nonempty with rexprs or ident? */
 
 import java_cup.runtime.*;
@@ -50,7 +50,7 @@ terminal			PLUS, MINUS, TIMES, DIVIDE;
 terminal			EQUALS, ATMOST, LESS, ATLEAST, MORE, EQUIV;
 terminal			LPAREN, RPAREN, LBRACE, RBRACE, LBRACKET, RBRACKET;
 terminal			COMMA, SEMICOLON, DOT, COLON;
-terminal Integer 	INT;
+terminal int		INT;
 terminal String 	STRING, IDENT;
 
 non terminal 				Program, Statement, Class;
@@ -88,7 +88,7 @@ precedence left DOT;
    Class   			::= Class_Signature:sig Class_Body:bd 									{: RESULT = new CLS(sig,bd); :}
    					;
    
-   Class_Signature  ::= CLASS IDENT:i LPAREN Formals RPAREN OptExtends:oe 					{: RESULT = CLS.signature(i, oe.name); :}
+   Class_Signature  ::= CLASS IDENT:i LPAREN Formals:f RPAREN OptExtends:oe 				{: RESULT = CLS.signature(i, f, oe.name); :}
    					;
 					
    OptExtends		::= EXTENDS IDENT:i 													{: RESULT = new Ident(i); :}
@@ -103,7 +103,7 @@ precedence left DOT;
 					
    Statement		::= IF R_Expr:e Statement_Block:s Elif_Statements:ef Else_Statement:es	{: RESULT = Stmt.ifstmt(e, s, ef, es); :}
 					|	WHILE R_Expr:e Statement_Block:s									{: RESULT = Stmt.whilestmt(e, s); :}
-					|	Return_Statement
+					|	Return_Statement:r													{: RESULT = Stmt.retstatement((Expr)r); :}
 					|	L_Expr COLON IDENT EQUALS R_Expr SEMICOLON
 					|	L_Expr:l EQUALS R_Expr:r SEMICOLON									{: RESULT = Stmt.assignstmt(l,r); :} /* check for null lexpr */
 					|	R_Expr:r SEMICOLON											   		{: if(r != null){RESULT = Stmt.cstatement((Expr.Constructor)r);} :}
@@ -120,8 +120,8 @@ precedence left DOT;
    					|																		{: RESULT = null; :}
 					;
 			
-   Return_Statement	::=	RETURN SEMICOLON
-   					|	RETURN R_Expr SEMICOLON
+   Return_Statement	::=	RETURN SEMICOLON													{: RESULT = new Expr("Nothing", "Nothing"); :}
+   					|	RETURN R_Expr:r SEMICOLON											{: RESULT = r; :}
 					;
    
    Formals			::= Formals_nonEmpty:fs													{: RESULT = fs; :}
@@ -141,7 +141,7 @@ precedence left DOT;
    					|																					{: RESULT = new LinkedList<Method>(); :}
 					;
    
-   Method			::= DEF IDENT:nm LPAREN Formals:ar RPAREN COLON IDENT:ret Statement_Block:s			{: RESULT = new Method(nm, ar, ret, s); :}
+   Method			::= DEF:d IDENT:nm LPAREN Formals:ar RPAREN COLON IDENT:ret Statement_Block:s		{: RESULT = new Method(nm, ar, ret, s); :}
    					;
 					
    Actual_Args		::= Args_nonEmpty:a								{: RESULT = a; :}
@@ -154,12 +154,12 @@ precedence left DOT;
    																		temp.add(r); RESULT = temp; :}
 					;
 					
-	L_Expr			::= IDENT:i											{: RESULT = new Expr(i); :}
-					| 	R_Expr DOT IDENT
+	L_Expr			::= IDENT:i											{: RESULT = new Expr(i, "Ident"); :}
+					| 	R_Expr:r DOT IDENT:i							{: RESULT = new Expr(r, i, "Ident"); :}
 					;
 	
-	R_Expr			::= STRING:s 										{: RESULT = Expr.stringconst(s); :}
-					|	INT:i											{: RESULT = Expr.intconst(i); :}
+	R_Expr			::= STRING:s 										{: RESULT = new Expr(s, "String"); :}
+					|	INT:i											{: RESULT = new Expr(i, "Int"); :}
 					| 	L_Expr:l										{: RESULT = l; :}
 					|	R_Expr:r1 PLUS R_Expr:r2						{: RESULT = Expr.binop("PLUS", r1, r2); :}
 					|	R_Expr:r1 MINUS R_Expr:r2						{: RESULT = Expr.binop("MINUS", r1, r2); :}

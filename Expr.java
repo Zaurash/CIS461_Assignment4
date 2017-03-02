@@ -2,7 +2,10 @@ import java.util.*;
 
 public class Expr{
 	
+	Expr loc;
 	String name;
+	int val;
+	String type = "Obj";
 	
 	public Expr(){
 
@@ -12,12 +15,29 @@ public class Expr{
 		this.name = n;
 	}
 	
+	public Expr(String n, String t){
+		this.name = n;
+		this.type = t;
+	}
+	
+	public Expr(int val, String t){
+		this.val = val;
+		this.type = t;
+	}
+	
+	public Expr(Expr l, String n, String t){
+		this.loc = l;
+		this.name = n;
+		this.type = t;
+	}
+	
 	// Conversion from expr to int
 	public static class IntConst extends Expr{
-		public int i;
+		public int name;
+		public String type = "Int";
 		
 		public IntConst(int i){
-			this.i = i;
+			this.name = i;
 		}
 	}
 	
@@ -27,10 +47,11 @@ public class Expr{
 	
 	// Conversion from expr to string
 	public static class StringConst extends Expr{
-		public String s;
+		public String name;
+		public String type = "String"; 
 		
 		public StringConst(String s){
-			this.s = s;
+			this.name = s;
 		}
 	}
 	

@@ -1,26 +1,40 @@
-class JustTheTop( x: Int ) extends Another
+class JustTheTop( x: String) extends Another
 	{
-	def STR() : String {
+	this.x = x;
+	this.y = "hi";
+	def STR(x: String) : String {
 			if 2 == 3 {
+			return "x";
 			}
 			
 			elif y < x {
-			x = y; }
+			x = y;
+			return "y"; }
 			
 			else {
+			return x;
+			}
+			
+			while(true){
+			return x;
 			}
 			
 		 }
 
 	}
 
-class Another( y: Obj )
-	{	def STR() : String {
+class Another( y: Obj ){
+	this.y = "foo";
+	def STR(x: String) : String {
+		return "x";
 		 }
 		 
-	def PLUS(other: Pt): Pt{
-	return Pt(this.x + other.x, this.y + other.y);
+	def PLUS(other: Int): Int{
+	
+	return other;
+	
 	}
+	
 		 }
 		 
 		 

@@ -80,4 +80,18 @@ public class Stmt{
 		return new CStatement(c);
 	}
 	
+	public static class RetStatement extends Stmt{
+		Expr ret_expr;
+		String ret_type;
+		
+		public RetStatement(Expr r){
+			this.ret_expr = r;
+			this.ret_type = r.type;
+		}
+	}
+	
+	public static RetStatement retstatement(Expr r){
+		return new RetStatement(r);
+	}
+	
 }

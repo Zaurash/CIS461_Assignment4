@@ -6,13 +6,9 @@ public class CLS{
 	public CLS.Body bd;
 	
 	public CLS(){
-		
+		this.sig = null;
+		this.bd = null;
 	}
-		
-	/*public CLS(String n, String s){
-		this.name = n;
-		this.super_class = s;
-	}*/
 	
 	public CLS(Signature s, Body b){
 		this.sig = s;
@@ -27,6 +23,35 @@ public class CLS{
 	  		  }
 	  	  }
 		  return false;
+		}
+		
+		public static Boolean issuper(Program res, String sup, String sub){
+  	  	  for(int inc = 0; inc < res.class_list.size(); inc++){
+			  if(sub.equals(res.class_list.get(inc).sig.name)){
+				  if(sub.equals(sup)){
+					  return true;
+				  }
+				  if(res.class_list.get(inc).sig.super_class.equals(sup)){
+					  return true;
+				  }
+				  else{
+					  if(res.class_list.get(inc).sig.super_class.equals("Obj")){
+						  return false;
+					  }
+					  issuper(res, sup, res.class_list.get(inc).sig.super_class);
+				  }
+			  }
+  	  	  }
+		  return false;
+		}
+		
+		public static CLS get_class(Program res, String s){
+			for(int inc = 0; inc < res.class_list.size(); inc++){
+				if(res.class_list.get(inc).sig.name.equals(s)){
+					return res.class_list.get(inc);
+				}
+			}
+			return new CLS();
 		}
 		
 		public static int loop_check(Program res, LinkedList visit, String s){			
@@ -53,16 +78,28 @@ public class CLS{
 		
 		public static class Signature extends CLS{
 			public String name;
+			public LinkedList<Method.Argument> formals;
 			public String super_class;
 			
 			public Signature(String n, String s){
 				this.name = n;
+				this.formals = new LinkedList<Method.Argument>();
+				this.super_class = s;
+			}
+			
+			public Signature(String n, LinkedList<Method.Argument> f, String s){
+				this.name = n;
+				this.formals = f;
 				this.super_class = s;
 			}
 		}
 		
 		public static Signature signature(String n, String s){
 			return new Signature(n,s);
+		}
+		
+		public static Signature signature(String n, LinkedList<Method.Argument> f, String s){
+			return new Signature(n, f, s);
 		}
 		
 		public static class Body extends CLS{
@@ -75,8 +112,8 @@ public class CLS{
 			}
 			
 			public Body(){
-				this.statements = null;
-				this.methods = null;
+				this.statements = new LinkedList<Stmt>();
+				this.methods = new LinkedList<Method>();
 			}
 			
 			
