@@ -19,6 +19,45 @@ public class scanner_driver {
 		  CLS cur_class = result.class_list.get(i);
 		  String c_name = cur_class.sig.name;
 		  String c_super = cur_class.sig.super_class;
+		  
+		  HashMap cl_vars = new HashMap<String, String>();	
+		  Set<String> cvar_names = new HashSet<String>();
+		  
+		  
+		  //Get hashmap of class arguments
+		  for(int j = 0; j < cur_class.sig.formals.size(); j++){
+			  cl_vars.put(cur_class.sig.formals.get(j).name, cur_class.sig.formals.get(j).type);
+			  cvar_names.add(cur_class.sig.formals.get(j).name);
+		  }	  
+		  
+		  
+		  //Get variables defined by class
+		  for(int v = 0; v < cur_class.bd.statements.size(); v++){
+			  String tt;
+			  if(Stmt.AssignStmt.class.isInstance(cur_class.bd.statements.get(v))){
+				  Stmt.AssignStmt zt = (Stmt.AssignStmt)cur_class.bd.statements.get(v);
+				  if(!(zt.l_expr.type.equals("Ident"))){
+					  System.err.println("ERROR: left side of expression isn't an identifier");
+					  System.exit(1);
+				  }
+				  
+				  if(zt.r_expr.type.equals("Ident")){
+					  if(!(cvar_names.contains(zt.r_expr.name))){
+						  System.err.println("ERROR: " + zt.r_expr.name + " is undefined");
+						  System.exit(1);
+					  }
+					  String gg = (String)zt.r_expr.name;
+					  
+					  tt = (String)cl_vars.get(gg);
+				  }
+				  else{
+					  String gg = (String)zt.r_expr.type;
+					  tt = gg;
+				  }
+				  cvar_names.add(zt.l_expr.name);
+				  cl_vars.put(zt.l_expr.name, tt);
+			  }
+		  }
 		  			  
 		  
 		  //Checking if methods are redefined in current class
@@ -86,13 +125,7 @@ public class scanner_driver {
 		  
 		  
 		  
-		  HashMap cl_vars = new HashMap<String, String>();		  
-		  
-		  //Get hashmap of class arguments
-		  for(int j = 0; j < cur_class.sig.formals.size(); j++){
-			  cl_vars.put(cur_class.sig.formals.get(j).name, cur_class.sig.formals.get(j).type);
-		  }
-		  
+		  		  
 		  
 		  //Check if each method returns the type it is supposed to return
 		  for(int j = 0; j < cur_methods.size(); j ++){
@@ -101,8 +134,10 @@ public class scanner_driver {
 			  
 			  //Get hashmap of method arguments
 			  HashMap<String, String> m_vars = new HashMap<String, String>();
+			  Set<String> mvar_names = new HashSet<String>();
 			  for (int ll = 0; ll < cur_meth.formals.size(); ll++){
 				  m_vars.put(cur_meth.formals.get(ll).name, cur_meth.formals.get(ll).type);
+				  mvar_names.add(cur_meth.formals.get(ll).name);
 			  }
 			  
 			  for(int k = 0; k < cur_meth.stmt_block.size(); k++){
@@ -209,6 +244,247 @@ public class scanner_driver {
 				  
 				  
 				  
+				  //check if variables are assigned before used
+				  for(int z = 0; z < cur_meth.stmt_block.size(); z++){
+					  Stmt cur_meth_stmt = cur_meth.stmt_block.get(z);
+					  Set<String> cpvar_names =  new HashSet<String>();
+					  Set<String> zzvar_names = new HashSet<String>();
+					  HashMap<String, String> cpcl_vars = new HashMap<String,String>();
+					  HashMap<String, String> firstcl_vars = new HashMap<String, String>();
+					  
+					  
+					  if(Stmt.WhileStmt.class.isInstance(cur_meth_stmt)){
+						  continue;
+					  }
+					  
+					  //Typechecks if statements
+					  // if(Stmt.IfStmt.class.isInstance(cur_meth_stmt)){
+// 						  Stmt.IfStmt cur_if_stmt = (Stmt.IfStmt)cur_meth_stmt;
+// 						  //test
+//
+// 						  for(int y = 0; y < cur_if_stmt.ifstmts.size(); y++){
+// 							  for(int x = 0; x < cur_if_stmt.ifstmts.get(y).stmts.size(); x++){
+// 								  if(Stmt.AssignStmt.class.isInstance(cur_if_stmt.ifstmts.get(y).stmts.get(x))){
+// 									  Stmt.AssignStmt cur_a = (Stmt.AssignStmt)cur_if_stmt.ifstmts.get(y).stmts.get(x);
+// 									  if(!(cur_a.l_expr.type.equals("Ident"))){
+// 										  System.err.println("ERROR: " + cur_a.l_expr.name + " is not an identifier ");
+// 										  System.exit(1);
+// 									  }
+//
+// 										  String hh = cur_a.l_expr.name;
+// 										  String gg = cur_a.r_expr.type;
+//
+//
+// 										  if(cur_a.r_expr.type.equals("Ident")){
+//
+// 										  if ((cvar_names.contains(cur_a.r_expr.name))){
+// 											  gg = (String)cl_vars.get(cur_a.r_expr.name);
+// 										  }
+//
+// 										  else if((zzvar_names.contains(cur_a.r_expr.name))){
+// 											  gg = (String)firstcl_vars.get(cur_a.r_expr.name);
+// 										  }
+// 										  else{
+// 											  System.err.println("ERROR: Variable " + cur_a.r_expr.name + " has not been initialized ");
+// 											  System.exit(1);
+// 										  }
+//
+// 									  }
+//
+// 									  if(firstcl_vars.get(cur_a.l_expr.name) != null){
+// 										  if(!(firstcl_vars.get(cur_a.l_expr.name).equals(gg))){
+// 											  System.out.println(firstcl_vars);
+// 											  System.err.println("ERROR: Variable " + hh + " of type " + firstcl_vars.get(cur_a.l_expr.name) + " cannot be assigned the value " + cur_a.r_expr.name + " of type " + gg);
+// 											  System.exit(1);
+// 										  }
+// 									  }
+//
+// 									  firstcl_vars.put(hh, gg);
+// 									  zzvar_names.add(cur_a.l_expr.name);
+//
+// 								  }
+// 								  //might need to cp above code again
+// 							  }
+// 							  break;
+//
+// 						  }
+//
+// 						  //end test
+// 						  for(int y = 0; y < cur_if_stmt.ifstmts.size(); y++){
+// 							  for(int x = 0; x < cur_if_stmt.ifstmts.get(y).stmts.size(); x++){
+// 								  cpvar_names = cvar_names;
+// 								  cpcl_vars = cl_vars;
+//
+//
+// 								  if(Stmt.AssignStmt.class.isInstance(cur_if_stmt.ifstmts.get(y).stmts.get(x))){
+// 									  Stmt.AssignStmt cur_a = (Stmt.AssignStmt)cur_if_stmt.ifstmts.get(y).stmts.get(x);
+// 									  if(!(cur_a.l_expr.type.equals("Ident"))){
+// 										  System.err.println("ERROR: " + cur_a.l_expr.name + " is not an identifier ");
+// 										  System.exit(1);
+// 									  }
+//
+// 										  String hh = cur_a.l_expr.name;
+// 										  String gg = cur_a.r_expr.type;
+//
+//
+// 										  if(cur_a.r_expr.type.equals("Ident")){
+// 										  if (!(cpvar_names.contains(cur_a.r_expr.name))){
+// 											  System.err.println("ERROR: Variable " + cur_a.r_expr.name + " has not been initialized ");
+// 											  System.exit(1);
+// 										  }
+// 										  gg = cpcl_vars.get(cur_a.r_expr.name);
+// 									  }
+//
+// 									  if(cpcl_vars.get(cur_a.l_expr.name) != null){
+// 										  if(!(cpcl_vars.get(cur_a.l_expr.name).equals(gg))){
+// 											  System.out.println(cpcl_vars);
+// 											  System.err.println("ERROR: Variable " + hh + " of type " + cpcl_vars.get(cur_a.l_expr.name) + " cannot be assigned the value " + cur_a.r_expr.name + " of type " + gg);
+// 											  System.exit(1);
+// 										  }
+// 									  }
+//
+// 									  cpcl_vars.put(hh, gg);
+// 									  cpvar_names.add(cur_a.l_expr.name);
+//
+// 								  }
+// 								  //might need to cp above code again
+//
+// 							  }
+// 							  //System.out.println(" zzvar " + zzvar_names + " cpvar " + cpvar_names);
+// 							  if(!(zzvar_names.equals(cpvar_names))){
+// 								  System.err.println("ERROR: not all variables initialized on all paths in method " + cur_meth.name);
+// 								  System.exit(1);
+// 						  }
+// 						  }
+// 					  }
+					  
+					  //if Constructor (CStatement)
+					  if(Stmt.CStatement.class.isInstance(cur_meth_stmt)){
+						  Stmt.CStatement cur_cons_stmt = (Stmt.CStatement)cur_meth_stmt;
+						  for(int y = 0; y < cur_cons_stmt.args.size(); y++){
+							  if (cur_cons_stmt.args.get(y).type == "Ident"){
+								  if(!(cvar_names.contains(cur_cons_stmt.args.get(y).name))){
+									  if(!(mvar_names.contains(cur_cons_stmt.args.get(y).name))){
+										  System.out.println("mvars" + m_vars);
+										  System.err.println("ERROR: Argument " + cur_cons_stmt.args.get(y).name + " has not been initialized");
+										  System.exit(1);
+									  }
+
+								  }
+							  }
+						  }
+					  }
+					  
+					  //if AssignStatement
+					  if(Stmt.AssignStmt.class.isInstance(cur_meth_stmt)){
+					  						  Stmt.AssignStmt cur_assign_stmt = (Stmt.AssignStmt)cur_meth_stmt;
+					  						  String temp = cur_assign_stmt.l_expr.type;
+					  						  String temptype = cur_assign_stmt.r_expr.type;
+
+					  						  if(cur_assign_stmt.r_expr.type == "Ident"){
+					  							  if(cvar_names.contains(cur_assign_stmt.r_expr.name)){
+					  								  temptype = (String)cl_vars.get(cur_assign_stmt.r_expr.name);
+					  								  }
+
+					  							  else if(mvar_names.contains(cur_assign_stmt.r_expr.name)){
+					  								  temptype = (String)m_vars.get(cur_assign_stmt.r_expr.name);
+					  							  }
+
+					  							  else{
+					  								  System.err.println("ERROR: Argument " + cur_assign_stmt.r_expr.name + " has not been initialized");
+					  								  System.exit(1);
+					  							  }
+
+					  							  }
+					  							  else{
+					  								  temptype = cur_assign_stmt.r_expr.type;
+					  							  }
+
+							  					if(cvar_names.contains(cur_assign_stmt.l_expr)){
+							  						temp = (String)cl_vars.get(cur_assign_stmt.l_expr);
+	  					  							if(temp != temptype){
+	  					  								  System.err.println("ERROR: L Expression " + cur_assign_stmt.l_expr.name + " cannot be assigned a type " + temptype);
+	  					  								  System.exit(1);
+	  					  							}
+							  					}
+							  					else if(mvar_names.contains(cur_assign_stmt.l_expr)){
+													
+							  						temp = (String)m_vars.get(cur_assign_stmt.l_expr);
+	  					  							if(temp != temptype){
+	  					  								  System.err.println("ERROR: L Expression " + cur_assign_stmt.l_expr.name + " cannot be assigned a type " + temptype);
+	  					  								  System.exit(1);
+	  					  							}
+							  					}
+												
+												else{
+	  					  						  m_vars.put(cur_assign_stmt.l_expr.name, temptype);
+												  mvar_names.add(cur_assign_stmt.l_expr.name);
+													
+												}
+
+					  }
+					  
+					  //if Method Statement
+					  if(Stmt.MethodStatement.class.isInstance(cur_meth_stmt)){
+  						  Stmt.MethodStatement cur_method_stmt = (Stmt.MethodStatement)cur_meth_stmt;
+						  for(int arg = 0; arg < cur_method_stmt.args.size(); arg++){
+							  if(cur_method_stmt.args.get(arg).type == "Ident"){
+								  if(!(cvar_names.contains(cur_method_stmt.args.get(arg).name))){
+									  if(!(mvar_names.contains(cur_method_stmt.args.get(arg).name))){
+		  								  System.err.println("ERROR: Method call of " + cur_method_stmt.method_name + " uses an unkown identifier " + cur_method_stmt.args.get(arg).name + " as an argument");
+		  								  System.exit(1);
+									  }
+								  }
+							  }
+						  }
+						  //Check well typedness of method calls
+							  //gets class of receiver object
+						  	 String rclass = cur_method_stmt.r_expr.type;
+							 //System.out.println("expr name " + cur_method_stmt.r_expr.name + " expr type " + cur_method_stmt.r_expr.type);
+						  	 if(cur_method_stmt.r_expr.type == "Ident"){
+								 if(cvar_names.contains(cur_method_stmt.r_expr.name)){
+									 rclass = (String)cl_vars.get(cur_method_stmt.r_expr.name);
+								 }
+								 else if(mvar_names.contains(cur_method_stmt.r_expr.name)){
+									 rclass = (String)m_vars.get(cur_method_stmt.r_expr.name);
+									 
+								 }
+								 else{
+  								  System.err.println("ERROR: Method call of " + cur_method_stmt.method_name + " uses an unkown identifier " + cur_method_stmt.r_expr.name + " as a receiver object");
+  								  System.exit(1);
+								 }
+						  	 }
+							 
+							if(!class_names.contains(rclass)){
+								  System.err.println("ERROR: Method call of " + cur_method_stmt.method_name + " uses an identifier " + cur_method_stmt.r_expr.name + " of an unknown class as a receiver object");
+								  System.exit(1);
+							}
+							
+   						  	for(int c = 0; c < result.class_list.size(); c++){
+								CLS thclass = result.class_list.get(c);
+								if(thclass.sig.name == rclass){
+									for(int m = 0; m < thclass.bd.methods.size(); m++){
+										if(thclass.bd.methods.get(m).name.equals(rclass)){
+											//compare args
+											if(thclass.bd.methods.get(m).formals.size() != cur_method_stmt.args.size()){
+												System.err.println("ERROR: Incorrect number of arguments for method " + cur_method_stmt.method_name);
+												System.exit(1);
+											}
+										}
+									}
+								}
+
+							 
+							 
+						  }
+						  
+					  }
+					  
+					  
+				  }
+				  
+
+
 				  //finish loop of method statements
 			  }
 		  }

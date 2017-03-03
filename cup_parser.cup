@@ -4,6 +4,7 @@
 
 import java_cup.runtime.*;
 import java.util.*;
+import java.lang.*;
 
 parser code {:
 
@@ -44,7 +45,7 @@ parser code {:
     }
 :};
 
-terminal			CLASS, DEF, EXTENDS, IF, ELIF, ELSE, WHILE, RETURN;
+terminal 			CLASS, DEF, EXTENDS, IF, ELIF, ELSE, WHILE, RETURN;
 terminal			AND, OR, NOT, none;
 terminal			PLUS, MINUS, TIMES, DIVIDE;
 terminal			EQUALS, ATMOST, LESS, ATLEAST, MORE, EQUIV;
@@ -106,7 +107,12 @@ precedence left DOT;
 					|	Return_Statement:r													{: RESULT = Stmt.retstatement((Expr)r); :}
 					|	L_Expr COLON IDENT EQUALS R_Expr SEMICOLON
 					|	L_Expr:l EQUALS R_Expr:r SEMICOLON									{: RESULT = Stmt.assignstmt(l,r); :} /* check for null lexpr */
-					|	R_Expr:r SEMICOLON											   		{: if(r != null){RESULT = Stmt.cstatement((Expr.Constructor)r);} :}
+					|	R_Expr:r SEMICOLON											   		{: if(r != null){
+																								if(Expr.Constructor.class.isInstance(r)){
+																									RESULT = Stmt.cstatement((Expr.Constructor)r);}
+																								if(Expr.MethodCall.class.isInstance(r)){
+																									RESULT = Stmt.methodstatement((Expr.MethodCall)r);	
+																										}} :}
 					;
 					
    Elif_Statements	::= Elif_Statements:stmts Elif_Statement:s								{: stmts.add(s); RESULT = stmts; :}
@@ -117,7 +123,7 @@ precedence left DOT;
 					;
 					
    Else_Statement	::= ELSE Statement_Block:s												{: RESULT = Stmt.ifbranch(new Expr("True"), s); :}
-   					|																		{: RESULT = null; :}
+   					|																		{: RESULT = Stmt.ifbranch(new Expr("false"), new LinkedList<Stmt>()); :}
 					;
 			
    Return_Statement	::=	RETURN SEMICOLON													{: RESULT = new Expr("Nothing", "Nothing"); :}
@@ -176,7 +182,7 @@ precedence left DOT;
 					| 	R_Expr AND R_Expr
 					| 	R_Expr OR R_Expr
 					| 	R_Expr NOT R_Expr
-					|	R_Expr DOT IDENT LPAREN Actual_Args RPAREN
+					|	R_Expr:r DOT IDENT:i LPAREN Actual_Args:a RPAREN	{: RESULT = Expr.methodcall(r, i, a); :}
 					|	IDENT:i LPAREN Actual_Args:a RPAREN					{: RESULT = Expr.constructor(i, a); :}
 					;
 					

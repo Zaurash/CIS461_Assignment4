@@ -53,8 +53,8 @@ public class Stmt{
 	} 
 	
 	public static class IFBRANCH extends Stmt{
-		Expr condition;
-		LinkedList<Stmt> stmts;
+		Expr condition = new Expr();
+		LinkedList<Stmt> stmts = new LinkedList<Stmt>();
 		
 		public IFBRANCH(Expr condition, LinkedList<Stmt> stmts){
 			this.condition = condition;
@@ -66,6 +66,7 @@ public class Stmt{
 		return new IFBRANCH(condition, stmts);
 	}
 	
+	//Constructor Statement
 	public static class CStatement extends Stmt{
 		String constructor_name;
 		LinkedList<Expr> args;
@@ -80,6 +81,24 @@ public class Stmt{
 		return new CStatement(c);
 	}
 	
+	//Method Statement
+	public static class MethodStatement extends Stmt{
+		Expr r_expr;
+		String method_name;
+		LinkedList<Expr> args;
+		
+		public MethodStatement(Expr.MethodCall s){
+			this.r_expr = s.r_expr;
+			this.method_name = s.method_name;
+			this.args = s.args;
+		}
+	}
+	
+	public static MethodStatement methodstatement(Expr.MethodCall c){
+		return new MethodStatement(c);
+	}
+	
+	//Return Statement
 	public static class RetStatement extends Stmt{
 		Expr ret_expr;
 		String ret_type;

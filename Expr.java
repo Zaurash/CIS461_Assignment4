@@ -3,12 +3,12 @@ import java.util.*;
 public class Expr{
 	
 	Expr loc;
-	String name;
+	String name = "foo";
 	int val;
 	String type = "Obj";
 	
 	public Expr(){
-
+		this.name = "temp";
 	}
 	
 	public Expr(String n){
@@ -21,6 +21,7 @@ public class Expr{
 	}
 	
 	public Expr(int val, String t){
+		this.name = new Integer(val).toString();
 		this.val = val;
 		this.type = t;
 	}
@@ -104,5 +105,21 @@ public class Expr{
 	public static Constructor constructor(String n, LinkedList<Expr> ar){
 		return new Constructor(n, ar);
 	}	
+	
+	public static class MethodCall extends Expr{
+		Expr r_expr;
+		String method_name;
+		LinkedList<Expr> args;
+		
+		public MethodCall(Expr r, String s, LinkedList<Expr>ar){
+			this.r_expr = r;
+			this.method_name = s;
+			this.args = ar;
+		}
+	}
+	
+	public static MethodCall methodcall(Expr r, String n, LinkedList<Expr> ar){
+		return new MethodCall(r, n, ar);
+	}
 	
 }
